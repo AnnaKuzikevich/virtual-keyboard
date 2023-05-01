@@ -426,6 +426,7 @@ class Keyboard {
     this.text = document.createElement('textarea');
     this.keyboard = document.createElement('div');
     const keyboardRow = document.createElement('div');
+    this.language = document.createElement('p');
 
     // Setup main elements
     this.wrapper.classList.add('wrapper');
@@ -436,12 +437,16 @@ class Keyboard {
     this.keyboard.classList.add('keyboard');
     keyboardRow.classList.add('keyboard__row');
 
+    this.language.classList.add('info');
+    this.language.textContent = 'To change the input language, press Ctrl+Alt on Windows or Cmd+Alt on Mac..';
+
     // Add to DOM
     this.keyboard.appendChild(keyboardFragment);
-    this.showLanguage(this.lang);
+    this.changeLanguage(this.lang);
 
     this.wrapper.appendChild(this.text);
     this.wrapper.appendChild(this.keyboard);
+    this.wrapper.appendChild(this.language);
 
     document.body.appendChild(this.wrapper);
 
@@ -479,7 +484,7 @@ class Keyboard {
           e.preventDefault();
           this.lang = this.lang === 'ru' ? 'en' : 'ru';
           localStorage.setItem('lang', this.lang);
-          this.showLanguage(this.lang, e.shiftKey);
+          this.changeLanguage(this.lang, e.shiftKey);
         } else if (!keyboardKeys[e.code].func) {
           e.preventDefault();
           this.insertText(key.textContent);
@@ -611,7 +616,7 @@ class Keyboard {
     }
   }
 
-  showLanguage(lang, shift = false) {
+  changeLanguage(lang, shift = false) {
     Array.from(this.keyboard.querySelectorAll('.keyboard__key')).forEach(
       (e) => {
         e.textContent = keyboardKeys[e.id][lang];
@@ -621,4 +626,46 @@ class Keyboard {
     this.switchCaps(shift);
   }
 
+  switchCaps(shiftKey) {
+    const showUpperCase = (this.caps && !shiftKey) || (!this.caps && shiftKey);
+    const toCase = showUpperCase ? 'toUpperCase' : 'toLowerCase';
+    Array.from(this.keyboard.querySelectorAll('.keyboard__key')).forEach(
+      (e) => {
+        if (!keyboardKeys[e.id].func) {
+          if (e.id === 'Backquote' && this.lang === 'en') {
+            e.textContent = shiftKey ? '~' : '`';
+          } else if (e.id === 'Minus' && this.lang === 'en') {
+            e.textContent = shiftKey ? '_' : '-';
+          } else if (e.id === 'Equal' && this.lang === 'en') {
+            e.textContent = shiftKey ? '+' : '=';
+          } else if (e.id === 'BracketLeft' && this.lang === 'en') {
+            e.textContent = shiftKey ? '{' : '[';
+          } else if (e.id === 'BracketRight' && this.lang === 'en') {
+            e.textContent = shiftKey ? '}' : ']';
+          } else if (e.id === 'Backslash' && this.lang === 'en') {
+            e.textContent = shiftKey ? '|' : '\\';
+          } else if (e.id === 'Semicolon' && this.lang === 'en') {
+            e.textContent = shiftKey ? ':' : ';';
+          } else if (e.id === 'Quote' && this.lang === 'en') {
+            e.textContent = shiftKey ? '"' : "'";
+          } else if (e.id === 'Comma' && this.lang === 'en') {
+            e.textContent = shiftKey ? '<' : ',';
+          } else if (e.id === 'Period' && this.lang === 'en') {
+            e.textContent = shiftKey ? '>' : '.';
+          } else if (e.id === 'Slash' && this.lang === 'en') {
+            e.textContent = shiftKey ? '?' : '/';
+          } else if (e.id === 'Slash' && this.lang === 'ru') {
+            e.textContent = shiftKey ? ',' : '.';
+          } else {
+            e.textContent = e.textContent[toCase]();
+          }
+        }
+      },
+    );
+  }
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+  const keyboard = new Keyboard();
+  keyboard.init();
+});
